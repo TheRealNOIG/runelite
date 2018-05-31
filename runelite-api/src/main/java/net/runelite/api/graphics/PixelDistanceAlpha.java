@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2018, Woox <https://github.com/wooxsolo>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,85 +22,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.rs.api;
+package net.runelite.api.graphics;
 
-import net.runelite.api.Projectile;
-import net.runelite.mapping.Import;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
-public interface RSProjectile extends RSRenderable, Projectile
+@Data
+@RequiredArgsConstructor
+class PixelDistanceAlpha
 {
-	@Import("id")
-	@Override
-	int getId();
-
-	@Import("interacting")
-	int getRsInteracting();
-
-	@Import("height")
-	@Override
-	int getHeight();
-
-	@Import("endHeight")
-	@Override
-	int getEndHeight();
-
-	@Import("x1")
-	@Override
-	int getX1();
-
-	@Import("y1")
-	@Override
-	int getY1();
-
-	@Import("floor")
-	@Override
-	int getFloor();
-
-	@Import("startMovementCycle")
-	@Override
-	int getStartMovementCycle();
-
-	@Import("endCycle")
-	@Override
-	int getEndCycle();
-
-	@Import("slope")
-	@Override
-	int getSlope();
-
-	@Import("startHeight")
-	@Override
-	int getStartHeight();
-
-	@Import("x")
-	@Override
-	double getX();
-
-	@Import("y")
-	@Override
-	double getY();
-
-	@Import("z")
-	@Override
-	double getZ();
-
-	@Import("scalar")
-	@Override
-	double getScalar();
-
-	@Import("velocityX")
-	@Override
-	double getVelocityX();
-
-	@Import("velocityY")
-	@Override
-	double getVelocityY();
-
-	@Import("velocityZ")
-	@Override
-	double getVelocityZ();
-
-	@Import("rotationX")
-	@Override
-	int getOrientation();
+	private final int outerAlpha;
+	private final int distArrayPos;
 }

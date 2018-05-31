@@ -24,6 +24,7 @@
  */
 package net.runelite.api;
 
+import java.awt.Color;
 import java.awt.Polygon;
 
 /**
@@ -38,4 +39,14 @@ public interface DecorativeObject extends TileObject
 	 * @see net.runelite.api.model.Jarvis
 	 */
 	Polygon getConvexHull();
+
+	Model getModel1();
+
+	Model getModel2();
+
+	int getOrientation();
+
+	void drawOutline(int outlineWidth, Color color);
+
+	void drawOutline(int outlineWidth, Color innerColor, Color outerColor);
 }

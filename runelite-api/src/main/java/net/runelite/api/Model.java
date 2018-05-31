@@ -24,6 +24,7 @@
  */
 package net.runelite.api;
 
+import java.awt.Color;
 import java.util.List;
 import net.runelite.api.model.Triangle;
 import net.runelite.api.model.Vertex;
@@ -33,6 +34,54 @@ import net.runelite.api.model.Vertex;
  */
 public interface Model extends Renderable
 {
+	/**
+	 * Gets the amount of vertices in the model.
+	 */
+	int getVerticesCount();
+
+	/**
+	 * Gets the x position of the vertices in the model.
+	 */
+	int[] getVerticesX();
+
+	/**
+	 * Gets the y positions of the vertices in the model.
+	 */
+	int[] getVerticesY();
+
+	/**
+	 * Gets the z positions of the vertices in the model.
+	 */
+	int[] getVerticesZ();
+
+	/**
+	 * Gets the amount of triangles in the model.
+	 */
+	int getTrianglesCount();
+
+	/**
+	 * Gets the first vertex index of the triangles in the model.
+	 */
+	int[] getTrianglesX();
+
+	/**
+	 * Gets the second vertex index of the triangles in the model.
+	 */
+	int[] getTrianglesY();
+
+	/**
+	 * Gets the third vertex index of the triangles in the model.
+	 */
+	int[] getTrianglesZ();
+
+	/**
+	 * Gets the transparency values of the triangles in the model, or null if
+	 * no parts of the model is transparent. 254 and 255 is fully transparent
+	 * and 0 is fully opaque. Note that negative values needs to be transformed
+	 * by casting to a type larger than 8 bits and removing any bits except 0xFF.
+	 */
+	byte[] getTriangleTransparencies();
+
 	/**
 	 * Gets a list of all vertices of the model.
 	 *
@@ -46,4 +95,18 @@ public interface Model extends Renderable
 	 * @return the triangle
 	 */
 	List<Triangle> getTriangles();
+
+	/**
+	 * Draw an outline around the model.
+	 *
+	 * @param localX The local x position of the model
+	 * @param localY The local y position of the model
+	 * @param localZ The local z position of the model
+	 * @param orientation The orientation of the model
+	 * @param outlineWidth The width of the outline
+	 * @param innerColor The color of the pixels of the outline closest to the model
+	 * @param outerColor The color of the pixels of the outline furthest away of the model
+	 */
+	void drawOutline(int localX, int localY, int localZ, int orientation,
+		int outlineWidth, Color innerColor, Color outerColor);
 }
