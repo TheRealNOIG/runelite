@@ -24,15 +24,11 @@
  */
 package net.runelite.mixins;
 
-import java.awt.Color;
 import java.awt.Polygon;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import net.runelite.api.MainBufferProvider;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
-import net.runelite.api.graphics.Rasterizer;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.mixins.Inject;
 import net.runelite.api.mixins.Mixin;
@@ -280,26 +276,5 @@ public abstract class RSModelMixin implements RSModel
 		}
 
 		return p;
-	}
-
-	@Override
-	@Inject
-	public void drawOutline(int localX, int localY, int localZ, int orientation,
-		int outlineWidth, Color innerColor, Color outerColor)
-	{
-		MainBufferProvider bufferProvider = (MainBufferProvider) client.getBufferProvider();
-		BufferedImage image = (BufferedImage) bufferProvider.getImage();
-
-		int clipX1 = client.getViewportXOffset();
-		int clipY1 = client.getViewportYOffset();
-		int clipX2 = client.getViewportWidth() + clipX1;
-		int clipY2 = client.getViewportHeight() + clipY1;
-
-		Rasterizer.drawOutline(image, clipX1, clipY1, clipX2, clipY2,
-			getVerticesCount(), getVerticesX(), getVerticesY(), getVerticesZ(),
-			getTrianglesCount(), getTrianglesX(), getTrianglesY(), getTrianglesZ(), getTriangleTransparencies(),
-			client.getCameraX(), client.getCameraY(), client.getCameraZ(),
-			client.getCameraPitch(), client.getCameraYaw(), client.getScale(),
-			localX, localY, localZ, orientation, outlineWidth, innerColor, outerColor);
 	}
 }
