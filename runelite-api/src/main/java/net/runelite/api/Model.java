@@ -34,6 +34,54 @@ import net.runelite.api.model.Vertex;
 public interface Model extends Renderable
 {
 	/**
+	 * Gets the amount of vertices in the model.
+	 */
+	int getVerticesCount();
+
+	/**
+	 * Gets the x position of the vertices in the model.
+	 */
+	int[] getVerticesX();
+
+	/**
+	 * Gets the y positions of the vertices in the model.
+	 */
+	int[] getVerticesY();
+
+	/**
+	 * Gets the z positions of the vertices in the model.
+	 */
+	int[] getVerticesZ();
+
+	/**
+	 * Gets the amount of triangles in the model.
+	 */
+	int getTrianglesCount();
+
+	/**
+	 * Gets the first vertex index of the triangles in the model.
+	 */
+	int[] getTrianglesX();
+
+	/**
+	 * Gets the second vertex index of the triangles in the model.
+	 */
+	int[] getTrianglesY();
+
+	/**
+	 * Gets the third vertex index of the triangles in the model.
+	 */
+	int[] getTrianglesZ();
+
+	/**
+	 * Gets the transparency values of the triangles in the model, or null if
+	 * no parts of the model is transparent. 254 and 255 is fully transparent
+	 * and 0 is fully opaque. Note that negative values needs to be transformed
+	 * by casting to a type larger than 8 bits and removing any bits except 0xFF.
+	 */
+	byte[] getTriangleTransparencies();
+
+	/**
 	 * Gets a list of all vertices of the model.
 	 *
 	 * @return the vertices

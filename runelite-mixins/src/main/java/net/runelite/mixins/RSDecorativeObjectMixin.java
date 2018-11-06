@@ -60,9 +60,34 @@ public abstract class RSDecorativeObjectMixin implements RSDecorativeObject
 	}
 
 	@Inject
-	private RSModel getModel()
+	@Override
+	public RSModel getModel1()
 	{
-		RSRenderable renderable = getRenderable();
+		RSRenderable renderable = getRenderable1();
+		if (renderable == null)
+		{
+			return null;
+		}
+
+		RSModel model;
+
+		if (renderable instanceof Model)
+		{
+			model = (RSModel) renderable;
+		}
+		else
+		{
+			model = renderable.getModel();
+		}
+
+		return model;
+	}
+
+	@Inject
+	@Override
+	public RSModel getModel2()
+	{
+		RSRenderable renderable = getRenderable2();
 		if (renderable == null)
 		{
 			return null;
@@ -86,14 +111,14 @@ public abstract class RSDecorativeObjectMixin implements RSDecorativeObject
 	@Override
 	public Area getClickbox()
 	{
-		return Perspective.getClickbox(client, getModel(), getOrientation(), getLocalLocation());
+		return Perspective.getClickbox(client, getModel1(), getOrientation(), getLocalLocation());
 	}
 
 	@Inject
 	@Override
 	public Polygon getConvexHull()
 	{
-		RSModel model = getModel();
+		RSModel model = getModel1();
 
 		if (model == null)
 		{

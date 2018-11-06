@@ -38,4 +38,14 @@ public interface DecorativeObject extends TileObject
 	 * @see net.runelite.api.model.Jarvis
 	 */
 	Polygon getConvexHull();
+
+	Model getModel1();
+
+	Model getModel2();
+
+	int getOffsetX();
+
+	int getOffsetY();
+
+	int getOrientation();
 }

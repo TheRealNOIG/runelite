@@ -58,6 +58,7 @@ import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetItem;
+import net.runelite.client.graphics.ModelOutlineRenderer;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -67,6 +68,9 @@ import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 
 public class DevToolsOverlay extends Overlay
 {
+	@Inject
+	private ModelOutlineRenderer modelOutliner;
+
 	public static final int ITEM_EMPTY = 6512;
 	public static final int ITEM_FILLED = 20594;
 
@@ -90,7 +94,7 @@ public class DevToolsOverlay extends Overlay
 	public DevToolsOverlay(Client client, DevToolsPlugin plugin, TooltipManager toolTipManager)
 	{
 		setPosition(OverlayPosition.DYNAMIC);
-		setLayer(OverlayLayer.ALWAYS_ON_TOP);
+		setLayer(OverlayLayer.ABOVE_SCENE);
 		this.client = client;
 		this.plugin = plugin;
 		this.toolTipManager = toolTipManager;
@@ -157,6 +161,7 @@ public class DevToolsOverlay extends Overlay
 		String text = local.getName() + " (A: " + local.getAnimation() + ") (G: " + local.getGraphic() + ")";
 		OverlayUtil.renderActorOverlay(graphics, local, text, CYAN);
 		renderPlayerWireframe(graphics, local, CYAN);
+
 	}
 
 	private void renderNpcs(Graphics2D graphics)
@@ -285,15 +290,8 @@ public class DevToolsOverlay extends Overlay
 				{
 					if (player.getLocalLocation().distanceTo(gameObject.getLocalLocation()) <= MAX_DISTANCE)
 					{
+						modelOutliner.drawOutline(gameObject, 1, Color.WHITE);
 						OverlayUtil.renderTileOverlay(graphics, gameObject, "ID: " + gameObject.getId(), GREEN);
-					}
-
-					// Draw a polygon around the convex hull
-					// of the model vertices
-					Polygon p = gameObject.getConvexHull();
-					if (p != null)
-					{
-						graphics.drawPolygon(p);
 					}
 				}
 			}
@@ -331,13 +329,8 @@ public class DevToolsOverlay extends Overlay
 		{
 			if (player.getLocalLocation().distanceTo(decorObject.getLocalLocation()) <= MAX_DISTANCE)
 			{
+				modelOutliner.drawOutline(decorObject, 1, Color.WHITE);
 				OverlayUtil.renderTileOverlay(graphics, decorObject, "ID: " + decorObject.getId(), DEEP_PURPLE);
-			}
-
-			Polygon p = decorObject.getConvexHull();
-			if (p != null)
-			{
-				graphics.drawPolygon(p);
 			}
 		}
 	}
@@ -377,17 +370,6 @@ public class DevToolsOverlay extends Overlay
 
 		for (Projectile projectile : projectiles)
 		{
-			int originX = projectile.getX1();
-			int originY = projectile.getY1();
-
-			LocalPoint tilePoint = new LocalPoint(originX, originY);
-			Polygon poly = Perspective.getCanvasTilePoly(client, tilePoint);
-
-			if (poly != null)
-			{
-				OverlayUtil.renderPolygon(graphics, poly, Color.RED);
-			}
-
 			int projectileId = projectile.getId();
 			Actor projectileInteracting = projectile.getInteracting();
 
@@ -406,7 +388,33 @@ public class DevToolsOverlay extends Overlay
 
 			if (projectileInteracting != null)
 			{
+				int originX = projectile.getX1();
+				int originY = projectile.getY1();
+
+				LocalPoint tilePoint = new LocalPoint(originX, originY);
+				Polygon poly = Perspective.getCanvasTilePoly(client, tilePoint);
+
+				if (poly != null)
+				{
+					OverlayUtil.renderPolygon(graphics, poly, Color.RED);
+				}
+
 				OverlayUtil.renderActorOverlay(graphics, projectile.getInteracting(), infoString, Color.RED);
+			}
+			else
+			{
+				int x = (int)projectile.getX();
+				int y = (int)projectile.getY();
+				int z = (int)projectile.getZ();
+				int textWidth = graphics.getFontMetrics().stringWidth(infoString);
+				Point p = Perspective.localToCanvas(client, new LocalPoint(x, y), 0,
+					Perspective.getTileHeight(client, new LocalPoint(x, y), projectile.getFloor()) - z);
+				if (p != null)
+				{
+					p = new Point(p.getX() - textWidth / 2, p.getY() - 25);
+					OverlayUtil.renderTextLocation(graphics, p, infoString, RED);
+					modelOutliner.drawOutline(projectile, 1, Color.WHITE);
+				}
 			}
 		}
 	}
