@@ -25,30 +25,36 @@
 package net.runelite.client.plugins.itemstats;
 
 import com.google.inject.Inject;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import net.runelite.api.Client;
+import net.runelite.api.ItemComposition;
 import net.runelite.api.MenuEntry;
+import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.tooltip.Tooltip;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 import net.runelite.client.util.ColorUtil;
-import net.runelite.client.util.QueryRunner;
 
 public class ItemStatOverlay extends Overlay
 {
 	@Inject
-	private QueryRunner queryRunner;
+	private Client client;
 
 	@Inject
-	private Client client;
+	private ItemManager itemManager;
 
 	@Inject
 	private TooltipManager tooltipManager;
 
 	@Inject
 	private ItemStatChanges statChanges;
+
+	@Inject
+	private ItemStatBonuses statBonuses;
 
 	@Inject
 	private ItemStatConfig config;
@@ -70,13 +76,37 @@ public class ItemStatOverlay extends Overlay
 		}
 
 		final MenuEntry entry = menu[menuSize - 1];
+		final int group = WidgetInfo.TO_GROUP(entry.getParam1());
+		final int child = WidgetInfo.TO_CHILD(entry.getParam1());
+		final Widget widget = client.getWidget(group, child);
 
-		if (entry.getParam1() != WidgetInfo.INVENTORY.getId())
+		if (widget == null || (group != WidgetInfo.INVENTORY.getGroupId() &&
+			group != WidgetInfo.EQUIPMENT.getGroupId() &&
+			group != WidgetInfo.EQUIPMENT_INVENTORY_ITEMS_CONTAINER.getGroupId()))
 		{
 			return null;
 		}
 
-		final Effect change = statChanges.get(entry.getIdentifier());
+		int itemId = entry.getIdentifier();
+
+		if (group == WidgetInfo.EQUIPMENT.getGroupId())
+		{
+			final Widget widgetItem = widget.getChild(1);
+			if (widgetItem != null)
+			{
+				itemId = widgetItem.getItemId();
+			}
+		}
+		else if (group == WidgetInfo.EQUIPMENT_INVENTORY_ITEMS_CONTAINER.getGroupId())
+		{
+			final Widget widgetItem = widget.getChild(entry.getParam0());
+			if (widgetItem != null)
+			{
+				itemId = widgetItem.getItemId();
+			}
+		}
+
+		final Effect change = statChanges.get(itemId);
 		if (change != null)
 		{
 			final StringBuilder b = new StringBuilder();
@@ -88,9 +118,77 @@ public class ItemStatOverlay extends Overlay
 			}
 
 			tooltipManager.add(new Tooltip(b.toString()));
+			return null;
+		}
+
+		final ItemComposition item = itemManager.getItemComposition(itemId);
+		if (item != null)
+		{
+			final ItemStatBonuses.ItemStats stats = statBonuses.getBonus(item);
+
+			if (stats != null)
+			{
+				tooltipManager.add(new Tooltip(buildStatBonusString(stats)));
+			}
 		}
 
 		return null;
+	}
+
+	private String getChangeString(final String label, final double value, final boolean inverse)
+	{
+		final Color plus = Positivity.getColor(config, Positivity.BETTER_UNCAPPED);
+		final Color minus = Positivity.getColor(config, Positivity.WORSE);
+
+		if (value == 0)
+		{
+			return "";
+		}
+
+		final Color color;
+
+		if (inverse)
+		{
+			color = value > 0 ? minus : plus;
+		}
+		else
+		{
+			color = value > 0 ? plus : minus;
+		}
+
+		final String valueString = (int)value == value ? String.valueOf((int)value) : String.valueOf(value);
+		final String symbol = value > 0 ? "+" : "";
+		return label + ": " + ColorUtil.wrapWithColorTag(symbol + valueString, color) + "</br>";
+	}
+
+	private String buildStatBonusString(ItemStatBonuses.ItemStats s)
+	{
+		StringBuilder b = new StringBuilder();
+		b.append(getChangeString("Weight", s.getWeight(), true));
+
+		final ItemStatBonuses.ItemEquipmentStats e = s.getEquipment();
+		if (s.isEquipable() && e != null)
+		{
+			b.append(getChangeString("Stab Attack", e.getAstab(), false));
+			b.append(getChangeString("Slash Attack", e.getAslash(), false));
+			b.append(getChangeString("Crush Attack", e.getAcrush(), false));
+			b.append(getChangeString("Magic Attack", e.getAmagic(), false));
+			b.append(getChangeString("Range Attack", e.getArange(), false));
+
+			b.append(getChangeString("Stab Defense", e.getDstab(), false));
+			b.append(getChangeString("Slash Defense", e.getDslash(), false));
+			b.append(getChangeString("Crush Defense", e.getDcrush(), false));
+			b.append(getChangeString("Magic Defense", e.getDmagic(), false));
+			b.append(getChangeString("Range Defense", e.getDrange(), false));
+
+			b.append(getChangeString("Melee Strength", e.getStr(), false));
+			b.append(getChangeString("Range Strength", e.getRstr(), false));
+			b.append(getChangeString("Magic Damage", e.getMdmg(), false));
+			b.append(getChangeString("Prayer", e.getPrayer(), false));
+			b.append(getChangeString("Attack Speed", e.getAspeed(), false));
+		}
+
+		return b.toString();
 	}
 
 	private String buildStatChangeString(StatChange c)
